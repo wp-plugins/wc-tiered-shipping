@@ -6,7 +6,7 @@
 Plugin Name: WC Tiered Shipping
 Plugin URI: http://www.thatdevgirl.com/wc-tiered-shipping
 Description: This WordPress plugin adds a tiered flat rate shipping option for the WooCommerce plugin.
-Version: 2.4
+Version: 2.4.5
 Author: Joni Halabi
 Author URI: http://www.jhalabi.com
 License: The MIT License
@@ -65,13 +65,6 @@ function tiered_shipping_init() {
 				// Load the settings.
 				$this->init_form_fields();
 				$this->init_settings();
-				
-				// Get user settings.
-				$this->usertitle   = $this->get_option('usertitle');
-				$this->quantity    = $this->get_option('quantity');
-				$this->progressive = $this->get_option('progressive');
-				$this->basefee     = $this->get_option('basefee');
-				$this->tierfee     = $this->get_option('tierfee');
 
 				// Save settings.
 				add_action( 'woocommerce_update_options_shipping_' . $this->id, array( &$this, 'process_admin_options' ) );
@@ -135,27 +128,27 @@ function tiered_shipping_init() {
 				$cart_total_items = array_sum($cart_item_quantities); 
 				
 				// Set the base shipping fee.
-				$shipping = $this->basefee;
+				$shipping = $this->get_option('basefee');
 				
 				// Override base fee with tiered fee if cart items are over the tier quantity.
-				if ($cart_total_items > $this->quantity) {
+				if ($cart_total_items > $this->get_option('quantity')) {
 					
 					// If the tier fee should be progressive, calculate the multiplier and add the tier fee * multiplier.
-					if ($this->progressive == 'yes') {
-						$multiplier = ceil($cart_total_items / $this->quantity) - 1;
-						$shipping += $this->tierfee * $multiplier;
+					if ($this->get_option('progressive') == 'yes') {
+						$multiplier = ceil($cart_total_items / $this->get_option('quantity')) - 1;
+						$shipping += $this->get_option('tierfee') * $multiplier;
 					} 
 					
 					// If the tier fee is flat, simply add the tier fee.
 					else {
-						$shipping += $this->tierfee;
+						$shipping += $this->get_option('tierfee');
 					}
 				}
 				
 				// Set the shipping rate.
 				$rate = array(
 					'id'    => $this->id,
-					'label' => $this->usertitle,
+					'label' => $this->get_option('usertitle'),
 					'cost'  => $shipping
 				);
 				
